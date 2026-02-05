@@ -18,6 +18,18 @@ jobs:
           echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+      - name: Ensure Docker on VM
+        run: |
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
+            command -v docker || (
+              sudo apt update &&
+              sudo apt install -y docker.io &&
+              sudo systemctl enable docker &&
+              sudo systemctl start docker &&
+              sudo usermod -aG docker ${{ secrets.VM_USER }}
+            )
+          "
+
 
       - name: Build Docker image
         run: |
