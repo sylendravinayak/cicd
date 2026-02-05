@@ -1,0 +1,53 @@
+name: Deploy FastAPI to GCE VM
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.APP_NAME }}:latest .
+
+      - name: Save Docker image
+        run: |
+          docker save ${{ secrets.APP_NAME }}:latest | gzip > app.tar.gz
+
+      - name: Copy image to VM
+        run: |
+          scp app.tar.gz \
+          ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/
+
+      - name: Deploy on VM
+        run: |
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+            docker load < app.tar.gz
+
+            docker stop fastapi || true
+            docker rm fastapi || true
+
+            docker run -d \
+              --name fastapi \
+              -p 80:8000 \
+              --restart unless-stopped \
+              fastapi-app:latest
+          EOF
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl --fail http://${{ secrets.VM_HOST }}/health
