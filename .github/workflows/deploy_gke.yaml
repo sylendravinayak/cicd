@@ -51,7 +51,7 @@ jobs:
           IMAGE_URI=${{ secrets.LOCATION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.REPO }}/fastapi
 
           kubectl apply -f deployment.yaml
-          kubectl apply -f service.yaml
+          
 
           kubectl set image deployment/${{ secrets.DEPLOYMENT_NAME }} \
             fastapi=$IMAGE_URI
