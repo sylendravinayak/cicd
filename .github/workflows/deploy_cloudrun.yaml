@@ -1,0 +1,27 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Docker login
+        run: gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com --key-file=${{ secrets.GCP_SA_KEY }} && gcloud auth configure-docker
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT_ID }}/fastapi-demo-app
+          docker build -t $IMAGE_NAME .
+      
+      
