@@ -18,7 +18,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Docker login
-        run: gcloud auth activate-service-account ${{ secrets.SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com --key-file=${{ secrets.GCP_SA_KEY }} && gcloud auth configure-docker
+        run: gcloud auth configure-docker
       - name: Build Docker image
         run: |
           IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT_ID }}/fastapi-demo-app
