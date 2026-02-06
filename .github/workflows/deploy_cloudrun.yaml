@@ -21,7 +21,9 @@ jobs:
         run: gcloud auth configure-docker
       - name: Build Docker image
         run: |
-          IMAGE_NAME=${{secrets.LOCATION}}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{secrets.REPO}}/fastapi:latest
+          IMAGE_NAME=${{ secrets.LOCATION }}-docker.pkg.dev/${{ secrets.PROJECT_ID }}/${{ secrets.REPO }}/fastapi:latest
+          echo "Building $IMAGE_NAME"
           docker build -t $IMAGE_NAME .
+
       
       
