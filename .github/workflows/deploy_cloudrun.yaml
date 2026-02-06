@@ -45,7 +45,6 @@ jobs:
             --region ${{ secrets.LOCATION }} \
             --platform managed \
             --allow-unauthenticated
-            --port 8000:8000
       - name: Get Cloud Run URL
         run: |
           SERVICE_URL=$(gcloud run services describe fastapi-inst \
